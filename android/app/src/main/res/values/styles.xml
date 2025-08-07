@@ -8,25 +8,4 @@
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
-</resources>```
-
-4.  **`Commit new file`** ile kaydet.
-
----
-
-**Adım 7 (SON DOSYA): `android/app/src/main/kotlin/com/example/nutriturk/MainActivity.kt` Dosyasını Oluştur**
-
-Bu, Android tarafındaki ana aktivite dosyasıdır ve Flutter'ı başlatan koddur.
-
-1.  **`Add file`** > **`Create new file`** yolunu izle.
-2.  Dosya adı kutusuna şunu yaz (çok dikkatli):
-    **`android/app/src/main/kotlin/com/example/nutriturk/MainActivity.kt`**
-3.  Metin alanına aşağıdaki Kotlin kodunu kopyala ve yapıştır:
-
-```kotlin
-package com.example.nutriturk
-
-import io.flutter.embedding.android.FlutterActivity
-
-class MainActivity: FlutterActivity() {
-}
+</resources>
