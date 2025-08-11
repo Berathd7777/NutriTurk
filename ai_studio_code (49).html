@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriTürk - Gıda & Fiyat Tarayıcı</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        :root { --primary-color: #00796B; --cheapest-color: #2e7d32; }
+        body { background-color: #f5f5f5; display: flex; flex-direction: column; min-height: 100vh; }
+        main { flex: 1 0 auto; padding-bottom: 50px; }
+        
+        /* --- HEADER İNCELTME (Agresif) --- */
+        nav, nav .nav-wrapper { height: 48px; line-height: 48px; }
+        nav a.brand-logo { font-size: 1.5rem; height: 48px; display: flex; align-items: center; }
+        nav a.brand-logo i { font-size: 2rem; margin-right: 8px; }
+
+        #reader-wrapper { display: none; padding: 20px; background: #333; border-radius: 12px; margin-top: 20px;}
+        #reader { width: 100%; max-width: 450px; margin: auto; }
+        
+        .product-card {
+            margin-top: 20px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: none; background-color: #fff; padding: 25px;
+        }
+
+        .product-main-header { display: flex; align-items: center; gap: 25px; }
+        .header-image { flex-shrink: 0; }
+        .header-image a { cursor: pointer; }
+        .header-image img { width: 100px; height: 100px; object-fit: contain; border-radius: 12px; }
+        .no-image-placeholder {
+            width: 100px; height: 100px; background-color: #f0f0f0; border: 1px dashed #ccc;
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            text-align: center; color: #888; font-size: 0.9rem; font-weight: 500;
+        }
+
+        .header-info { display: flex; flex-direction: column; }
+        .header-info .brand { font-size: 1.3rem; font-weight: 500; color: #555; margin: 0; min-height: 24px; }
+        .header-info .product-name { font-size: 1.8rem; font-weight: 600; color: #333; margin: 5px 0; line-height: 1.2; }
+        .header-info .quantity { font-size: 1rem; color: #777; margin: 0; }
+        
+        .scores-row-container {
+            display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap;
+            gap: 15px; padding: 20px 0; border-top: 1px solid #eee; margin: 25px 0 0 0;
+        }
+        .score-card { text-align: center; }
+        .score-card h5 { font-size: 1rem; font-weight: 500; color: #666; margin: 0 0 10px 0; }
+        .score-card .score-visual img { height: 40px; width: auto; }
+        .score-card .score-visual .no-data { font-style: italic; color: #888; font-size: 0.9rem; }
+        
+        .collapsible { border: none; box-shadow: none; margin-top: 20px; }
+        .collapsible-header { font-weight: 500; color: #333; background-color: #f9f9f9; border-radius: 8px; margin-bottom: 5px; }
+        .collapsible-header i { color: var(--primary-color); }
+        .collapsible-body { padding: 25px; border-radius: 0 0 8px 8px; background: #fff; line-height: 1.7; word-break: break-word; border: 1px solid #f0f0f0; border-top:none; }
+        
+        #price-table-container { margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px; }
+        #price-table-container h3 { font-size: 1.5rem; font-weight: 600; margin-bottom: 15px; color: #333; }
+        #price-table { width: 100%; border-collapse: collapse; }
+        #price-table th, #price-table td { padding: 12px 15px; border-bottom: 1px solid #eee; text-align: left; vertical-align: middle; }
+        #price-table th { background-color: #f5f5f5; font-weight: 600; }
+        #price-table td.market-logo-cell { width: 120px; text-align: center; }
+        #price-table .market-logo { max-height: 35px; max-width: 90px; }
+        #price-table td.price-cell { font-weight: bold; color: var(--primary-color); font-size: 1.2rem; text-align: right; }
+        #price-table .cheapest-label { font-size: 0.8rem; font-weight: 700; color: var(--cheapest-color); margin-left: 8px; }
+        #price-table tr.cheapest td { background-color: #e8f5e9; }
+        #price-table tr.cheapest td.price-cell { color: var(--cheapest-color); }
+        
+        .manual-input-container { display: flex; align-items: center; margin: 30px auto; max-width: 600px; }
+        .manual-input-container .input-field { margin: 0; margin-right: 15px; flex-grow: 1; }
+        
+        #scan-button-container { text-align: center; margin: 30px 0; }
+        
+        /* --- FOOTER İNCELTME VE TEK SATIR HİZALAMA --- */
+        footer.page-footer { background-color: var(--primary-color); padding-top: 0; }
+        footer .footer-copyright { padding: 0 10px; min-height: 44px; display: flex; align-items: center; }
+        footer .footer-copyright .container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        footer .footer-buttons { display: flex; gap: 10px; align-items: center; }
+        footer .footer-buttons a img { height: 24px; } /* Butonları küçült */
+        footer .footer-copyright span { color: rgba(255,255,255,0.8); }
+        
+        .modal-overlay { opacity: 0.9 !important; }
+        #image-modal { background-color: transparent; box-shadow: none; max-width: 90%; width: auto; max-height: 90%; border-radius: 12px; overflow: visible; }
+        #image-modal .modal-content { padding: 0; text-align: center; }
+        #image-modal img { max-width: 100%; max-height: 85vh; border-radius: 8px; }
+        .modal-close-button { position: absolute; top: -25px; right: -25px; background-color: rgba(0,0,0,0.7); color: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; line-height: 50px; }
+
+        @media (max-width: 600px) {
+            .product-main-header { flex-direction: column; align-items: flex-start; }
+            .modal-close-button { top: 10px; right: 10px; width: 40px; height: 40px; line-height: 40px; }
+            /* Mobil için footer'ı dikey hizala */
+            footer .footer-copyright .container { flex-direction: column; gap: 8px; padding: 8px 0; height: auto;}
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-wrapper container">
+            <a href="#!" class="brand-logo"><i class="material-icons">eco</i>NutriTürk</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Sayfa içeriği aynı -->
+        <div id="scan-button-container">
+            <button class="btn-large waves-effect waves-light" id="scan-button" style="background-color: var(--primary-color);"><i class="material-icons left">camera_alt</i>Kamerayla Tara</button>
+        </div>
+        
+        <div class="manual-input-container">
+            <div class="input-field"><input id="barcode-input" type="text" placeholder="Ürün adı veya barkod girin..."><label for="barcode-input">Manuel Arama</label></div>
+            <button class="btn-floating btn-large waves-effect waves-light" id="manual-search-button" style="background-color: var(--primary-color);"><i class="material-icons">search</i></button>
+        </div>
+
+        <div id="reader-wrapper"><div id="reader"></div></div>
+        <div id="loader" class="center-align" style="padding: 50px; display: none;"><div class="preloader-wrapper big active"><div class="spinner-layer spinner-green-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div></div>
+        
+        <div id="product-card" class="card product-card">
+            <div class="product-main-header">
+                <div id="header-image-container" class="header-image"></div>
+                <div class="header-info">
+                    <p id="brand" class="brand"></p>
+                    <h1 id="product-name" class="product-name"></h1>
+                    <p id="quantity" class="quantity"></p>
+                </div>
+            </div>
+            <div id="price-table-container"></div>
+            <div id="scores-container" class="scores-row-container"></div>
+            <ul class="collapsible" id="details-accordion"></ul>
+        </div>
+
+        <div id="not-found" class="card-panel red lighten-1" style="display: none;"><span class="white-text"><i class="material-icons left">error_outline</i>Ürün bulunamadı. Lütfen barkodu kontrol edin veya farklı anahtar kelimelerle tekrar deneyin.</span></div>
+    </main>
+
+    <div id="image-modal" class="modal"><div class="modal-content"><img id="modal-product-image" src="" alt="Büyük Ürün Resmi"></div><a class="modal-close modal-close-button"><i class="material-icons">close</i></a></div>
+
+<footer class="page-footer">
+  <div class="footer-copyright">
+    <div class="container">
+        <div class="footer-buttons">
+            <a href="https://coff.ee/brtplus" target="_blank">
+              <img src="https://img.shields.io/badge/Destek%20Ol!-yellow?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Destek Ol!">
+            </a>
+            <a href="https://forms.gle/xe7wif3a22Bnxy9DA" target="_blank">
+              <img src="https://img.shields.io/badge/Ürün%20Ekle-blue?style=for-the-badge" alt="Ürün Ekle">
+            </a>
+        </div>
+        <span>©2025 NutriTürk</span>
+    </div>
+  </div>
+</footer>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            M.AutoInit(); 
+
+            // --- DOM Elementleri ve Değişkenler ---
+            const scanButton = document.getElementById('scan-button');
+            const manualSearchButton = document.getElementById('manual-search-button');
+            const barcodeInput = document.getElementById('barcode-input');
+            const readerWrapper = document.getElementById('reader-wrapper');
+            const productCard = document.getElementById('product-card');
+            const loader = document.getElementById('loader');
+            const notFoundDiv = document.getElementById('not-found');
+            const accordionContainer = document.getElementById('details-accordion');
+            const scoresContainer = document.getElementById('scores-container');
+            const imageContainer = document.getElementById('header-image-container');
+            const priceTableContainer = document.getElementById('price-table-container');
+
+            // --- API, Sabitler ve Ses ---
+            const MARKET_API_URL = "https://api.marketfiyati.org.tr/api/v2";
+            const html5QrCode = new Html5Qrcode("reader");
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            const MARKET_LOGOS = {
+                "bim": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/bim-home.svg",
+                "a101": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/a101-home.svg",
+                "sok": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/sok-home.svg",
+                "migros": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/migros-home.svg",
+                "carrefoursa": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/carrefour-home.svg",
+                "tarim kredi": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/tarim-kredi-home.svg"
+            };
+
+            // --- Ses Fonksiyonları ---
+            function playSound(type = 'success') {
+                if(!audioContext) return;
+                const o = audioContext.createOscillator();
+                o.type = (type === 'success') ? 'sine' : 'square';
+                o.frequency.setValueAtTime((type === 'success') ? 900 : 220, audioContext.currentTime);
+                o.connect(audioContext.destination);
+                o.start();
+                o.stop(audioContext.currentTime + 0.15);
+            }
+            function speak(text) {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const u = new SpeechSynthesisUtterance(text);
+                    u.lang = 'tr-TR';
+                    window.speechSynthesis.speak(u);
+                }
+            }
+            
+            function getMarketKey(marketName) {
+                const name = marketName.toLowerCase();
+                if (name.includes('carrefour')) return 'carrefoursa';
+                if (name.includes('tarım') || name.includes('kredi')) return 'tarim kredi';
+                if (name.includes('a101')) return 'a101';
+                if (name.includes('bim')) return 'bim';
+                if (name.includes('şok')) return 'sok';
+                if (name.includes('migros')) return 'migros';
+                return null;
+            }
+            
+            // --- Ana Arama Fonksiyonları ---
+            const searchForProduct = (query) => {
+                const trimmedQuery = query.trim();
+                if (!trimmedQuery) return;
+                resetUI();
+                loader.style.display = 'block';
+                const isBarcode = /^\d{8,13}$/.test(trimmedQuery);
+
+                if (isBarcode) {
+                    fetchProductFromMarketAPI(trimmedQuery, 'barcode');
+                } else {
+                    fetchProductFromMarketAPI(trimmedQuery, 'name');
+                }
+            };
+            
+            const onScanSuccess = (decodedText) => {
+                html5QrCode.stop().then(() => {
+                    readerWrapper.style.display = 'none';
+                    playSound('success');
+                    M.toast({html: `Barkod okundu: ${decodedText}`});
+                    searchForProduct(decodedText);
+                }).catch(err => console.error("Kamera durdurulamadı", err));
+            };
+
+            // --- API İstekleri (değişiklik yok) ---
+            async function fetchProductFromMarketAPI(query, type) {
+                const url = type === 'barcode' ? `${MARKET_API_URL}/searchByIdentity` : `${MARKET_API_URL}/search`;
+                const body = type === 'barcode' ? { identity: query, identityType: "barcode" } : { keywords: query };
+                
+                try {
+                    const res = await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body)
+                    });
+                    const json = await res.json();
+                    
+                    if(json.content && json.content.length > 0) {
+                        const product = json.content[0];
+                        displayMarketProduct(product);
+                        if (product.barcode) {
+                           fetchProductFromOFF(product.barcode, true, product.imageUrl);
+                        } else {
+                           loader.style.display = 'none';
+                        }
+                    } else {
+                        if(type === 'barcode') {
+                           fetchProductFromOFF(query, false);
+                        } else {
+                           handleNotFound();
+                        }
+                    }
+                } catch(e) {
+                    console.error("Market API Hatası:", e);
+                    if(type === 'barcode') {
+                       fetchProductFromOFF(query, false);
+                    } else {
+                       handleNotFound();
+                    }
+                }
+            }
+
+            async function fetchProductFromOFF(barcode, isUpdate = false, marketImageUrl = null) {
+                const fields = "product_name_tr,product_name,brands,quantity,categories_hierarchy,ingredients_text_with_allergens_tr,allergens_hierarchy,image_url,nutriscore_grade,ecoscore_grade,nova_group";
+                const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json?fields=${fields}`;
+                try {
+                    const r = await fetch(url);
+                    const d = await r.json();
+                    
+                    if (d.status === 1 && d.product && (d.product.product_name || d.product.product_name_tr)) {
+                        displayOFFProduct(d.product, isUpdate, marketImageUrl);
+                    } else {
+                        if (!isUpdate) handleNotFound();
+                    }
+                } catch (error) {
+                    console.error("OpenFoodFacts API Hatası:", error);
+                    if (!isUpdate) handleNotFound();
+                } finally {
+                    loader.style.display = 'none';
+                }
+            }
+
+            // --- Arayüz Güncelleme Fonksiyonları ---
+            function displayMarketProduct(product) {
+                displayProductHeader(product.title, '', null, product.imageUrl);
+                setTimeout(() => speak(product.title), 400); // Sesli oku
+                
+                if (product.productDepotInfoList && product.productDepotInfoList.length > 0) {
+                    const prices = product.productDepotInfoList.sort((a,b) => a.price - b.price);
+                    let tableHTML = `<h3>Market Fiyatları</h3><table id="price-table"><thead><tr><th>Market</th><th class="right-align">Fiyat</th></tr></thead><tbody>`;
+                    
+                    prices.forEach((item, idx) => {
+                        const isCheapest = idx === 0;
+                        const marketKey = getMarketKey(item.marketAdi);
+                        const logoUrl = marketKey ? MARKET_LOGOS[marketKey] : '';
+
+                        tableHTML += `
+                            <tr class="${isCheapest ? 'cheapest' : ''}">
+                                <td class="market-logo-cell">
+                                    ${logoUrl ? `<img src="${logoUrl}" alt="${item.marketAdi}" title="${item.marketAdi}" class="market-logo">` : `<span>${item.marketAdi}</span>`}
+                                </td>
+                                <td class="price-cell">
+                                    ${item.price.toFixed(2)} ₺
+                                    ${isCheapest ? '<span class="cheapest-label">- En Ucuz</span>' : ''}
+                                </td>
+                            </tr>`;
+                    });
+                    tableHTML += `</tbody></table>`;
+                    priceTableContainer.innerHTML = tableHTML;
+                }
+                productCard.style.display = 'block';
+            }
+            
+            function displayOFFProduct(product, isUpdate, marketImageUrl) {
+                const productName = product.product_name_tr || product.product_name;
+                const brandName = product.brands || '';
+                const imageUrl = product.image_url || marketImageUrl;
+
+                if (!isUpdate) {
+                    displayProductHeader(productName, brandName, product.quantity, imageUrl);
+                    playSound('success'); // OFF'dan ilk kez bulunursa ses çal
+                    setTimeout(() => speak(`${brandName}, ${productName}`), 400); // Sesli oku
+                } else {
+                    const currentImg = imageContainer.querySelector('img');
+                    if (!currentImg && imageUrl) {
+                        displayProductImage(imageUrl, productName);
+                    }
+                    if (brandName && document.getElementById('brand').textContent === '') {
+                        document.getElementById('brand').textContent = brandName;
+                    }
+                }
+
+                scoresContainer.innerHTML = '';
+                if(product.nutriscore_grade) addScore('Nutri-Score', product.nutriscore_grade, 'nutriscore');
+                if(product.ecoscore_grade) addScore('Eco-Score', product.ecoscore_grade, 'ecoscore');
+                if(product.nova_group) addScore('NOVA Grubu', product.nova_group, 'nova-group');
+
+                accordionContainer.innerHTML = '';
+                const ingredients = product.ingredients_text_with_allergens_tr || product.ingredients_text_with_allergens;
+                if(ingredients) addAccordionItem('İçindekiler', ingredients.replace(/_/g, ''), 'list_alt');
+
+                const allergens = product.allergens_hierarchy?.map(cat => cat.replace(/en:|fr:/g, '').replace(/-/g, ' ')).join(', ');
+                if(allergens) addAccordionItem('Alerjenler', `<span style="color: #d32f2f; font-weight: 500;">${allergens}</span>`, 'warning');
+                
+                const categories = product.categories_hierarchy?.map(cat => cat.replace(/en:|fr:/g, '').replace(/-/g, ' ')).join(' &rarr; ');
+                if(categories) addAccordionItem('Kategoriler', categories, 'category');
+
+                if(accordionContainer.innerHTML !== ''){
+                   M.Collapsible.init(document.querySelectorAll('.collapsible'));
+                }
+                
+                productCard.style.display = 'block';
+            }
+            
+            function displayProductImage(imageUrl, altText) {
+                imageContainer.innerHTML = ''; 
+                 if (imageUrl) {
+                    const link = document.createElement('a');
+                    link.href = '#image-modal';
+                    link.className = 'modal-trigger';
+                    const img = document.createElement('img');
+                    img.src = imageUrl;
+                    img.alt = altText;
+                    link.appendChild(img);
+                    imageContainer.appendChild(link);
+                    document.getElementById('modal-product-image').src = imageUrl;
+                     M.Modal.init(document.querySelectorAll('.modal'));
+                } else {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'no-image-placeholder';
+                    placeholder.textContent = 'Görsel Yok';
+                    imageContainer.appendChild(placeholder);
+                }
+            }
+
+            function displayProductHeader(productName, brandName, quantity, imageUrl) {
+                displayProductImage(imageUrl, productName);
+                document.getElementById('brand').textContent = brandName || '';
+                document.getElementById('product-name').textContent = productName || '';
+                document.getElementById('quantity').textContent = quantity || '';
+            }
+
+            function addScore(title, score, type){
+                let visualHtml = `<div class="score-visual"><span class="no-data">Veri Yok</span></div>`;
+                if(score){
+                    let score_img_url;
+                    switch(type) {
+                        case 'nutriscore': score_img_url = `https://static.openfoodfacts.org/images/misc/nutriscore-${String(score).toLowerCase()}.svg`; break;
+                        case 'ecoscore': score_img_url = `https://static.openfoodfacts.org/images/misc/ecoscore/ecoscore-${String(score).toLowerCase()}.svg`; break;
+                        case 'nova-group': score_img_url = `https://static.openfoodfacts.org/images/misc/nova-dark-mode/nova-group-${score}-dark.svg`; break;
+                    }
+                    if(score_img_url) visualHtml = `<div class="score-visual"><img src="${score_img_url}" alt="${title} ${score}"></div>`;
+                }
+                scoresContainer.innerHTML += `<div class="score-card"><h5>${title}</h5>${visualHtml}</div>`;
+            }
+
+            function addAccordionItem(title, content, icon) {
+                const item = `<li><div class="collapsible-header"><i class="material-icons">${icon}</i>${title}</div><div class="collapsible-body"><span>${content}</span></div></li>`;
+                accordionContainer.innerHTML += item;
+            }
+            
+            function handleNotFound() {
+                loader.style.display = 'none';
+                notFoundDiv.style.display = 'block';
+                playSound('error');
+                speak("Ürün bulunamadı");
+            }
+
+            function resetUI() {
+                productCard.style.display = 'none';
+                notFoundDiv.style.display = 'none';
+                loader.style.display = 'block';
+                readerWrapper.style.display = 'none';
+                accordionContainer.innerHTML = '';
+                scoresContainer.innerHTML = '';
+                priceTableContainer.innerHTML = '';
+                if (html5QrCode && html5QrCode.isScanning) {
+                    html5QrCode.stop().catch(err => {});
+                }
+            }
+            
+            // --- Olay Dinleyicileri ---
+            scanButton.addEventListener('click', () => {
+                resetUI();
+                readerWrapper.style.display = 'block';
+                html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 280, height: 180 } }, onScanSuccess, undefined)
+                    .catch(err => M.toast({html: 'Kamera başlatılamadı.'}));
+            });
+
+            manualSearchButton.addEventListener('click', () => searchForProduct(barcodeInput.value));
+            barcodeInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchForProduct(barcodeInput.value); });
+        });
+    </script>
+</body>
+</html>
