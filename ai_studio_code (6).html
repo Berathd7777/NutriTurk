@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriTürk - Gıda & Fiyat Tarayıcı</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --md-sys-color-primary: #006C51;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #7DF8D0;
+            --md-sys-color-on-primary-container: #002117;
+            --md-sys-color-secondary: #4A635C;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #CCE8DF;
+            --md-sys-color-on-secondary-container: #05201A;
+            --md-sys-color-surface: #F6FBF8;
+            --md-sys-color-on-surface: #171D1B;
+            --md-sys-color-surface-variant: #DBE5E0;
+            --md-sys-color-on-surface-variant: #3F4945;
+            --md-sys-color-outline: #6F7975;
+            --md-sys-color-error: #BA1A1A;
+            --md-sys-color-error-container: #FFDAD6;
+            --md-sys-color-on-error-container: #410002;
+            --md-sys-color-surface-container-low: #F0F5F2;
+            --md-sys-color-surface-container: #EAEFEC;
+            --md-sys-color-surface-container-high: #E5EAE7;
+            --md-sys-color-surface-container-highest: #DFE4E1;
+            --md-sys-color-cheapest: #146B3A;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            line-height: 1.6;
+        }
+        
+        /* Top App Bar */
+        .top-app-bar {
+            background-color: var(--md-sys-color-surface-container);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .top-app-bar .leading {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .top-app-bar .material-icons {
+            font-size: 28px;
+            color: var(--md-sys-color-primary);
+        }
+        
+        .top-app-bar h1 {
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 16px;
+        }
+        
+        /* Buttons - Material Design 3 */
+        .md3-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: 0.1px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .md3-button-filled {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+        }
+        
+        .md3-button-filled:hover {
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+        }
+        
+        .md3-button-filled:active {
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+        }
+        
+        .md3-fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 8px 3px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+        
+        .md3-fab:hover {
+            box-shadow: 0 2px 3px rgba(0,0,0,0.3), 0 6px 10px 4px rgba(0,0,0,0.15);
+        }
+        
+        .md3-fab .material-icons {
+            font-size: 24px;
+        }
+        
+        /* Text Field */
+        .md3-text-field {
+            position: relative;
+            width: 100%;
+        }
+        
+        .md3-text-field input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 4px;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font-size: 16px;
+            font-family: 'Roboto', sans-serif;
+            transition: all 0.2s;
+        }
+        
+        .md3-text-field input:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            border-width: 2px;
+            padding: 15px;
+        }
+        
+        .md3-text-field label {
+            position: absolute;
+            left: 16px;
+            top: 16px;
+            color: var(--md-sys-color-on-surface-variant);
+            pointer-events: none;
+            transition: all 0.2s;
+            background-color: var(--md-sys-color-surface);
+            padding: 0 4px;
+        }
+        
+        .md3-text-field input:focus + label,
+        .md3-text-field input:not(:placeholder-shown) + label {
+            top: -8px;
+            font-size: 12px;
+            color: var(--md-sys-color-primary);
+        }
+        
+        /* Search Container */
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        
+        .manual-search {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .manual-search .md3-text-field {
+            flex: 1;
+        }
+        
+        /* Reader Wrapper */
+        #reader-wrapper {
+            display: none;
+            background-color: var(--md-sys-color-surface-container-high);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        }
+        
+        #reader {
+            max-width: 500px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        /* Loader */
+        .loader-container {
+            display: none;
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .md3-circular-progress {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--md-sys-color-primary-container);
+            border-top-color: var(--md-sys-color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Product Card */
+        .product-card {
+            display: none;
+            background-color: var(--md-sys-color-surface-container-low);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        }
+        
+        .product-header {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .product-image-container {
+            flex-shrink: 0;
+        }
+        
+        .product-image-container img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            border-radius: 16px;
+            background-color: var(--md-sys-color-surface-container-highest);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .product-image-container img:hover {
+            transform: scale(1.05);
+        }
+        
+        .product-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .product-brand {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface-variant);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .product-name {
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            line-height: 1.3;
+        }
+        
+        .product-quantity {
+            font-size: 14px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-top: 4px;
+        }
+        
+        /* Price Table */
+        .price-section {
+            margin: 24px 0;
+        }
+        
+        .price-section h2 {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .price-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .price-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+        
+        .price-item:hover {
+            background-color: var(--md-sys-color-surface-container-high);
+        }
+        
+        .price-item.cheapest {
+            background-color: var(--md-sys-color-primary-container);
+        }
+        
+        .market-logo {
+            max-height: 32px;
+            max-width: 100px;
+        }
+        
+        .price-value {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--md-sys-color-primary);
+        }
+        
+        .price-item.cheapest .price-value {
+            color: var(--md-sys-color-cheapest);
+        }
+        
+        .cheapest-badge {
+            background-color: var(--md-sys-color-cheapest);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* Scores */
+        .scores-section {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 24px;
+            padding: 24px 0;
+            border-top: 1px solid var(--md-sys-color-surface-variant);
+            margin: 24px 0;
+        }
+        
+        .score-card {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .score-title {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface-variant);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .score-visual img {
+            height: 48px;
+            width: auto;
+        }
+        
+        .score-visual .no-data {
+            color: var(--md-sys-color-on-surface-variant);
+            font-style: italic;
+            font-size: 14px;
+        }
+        
+        /* Accordion */
+        .accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .accordion-item {
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .accordion-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+        
+        .accordion-header:hover {
+            background-color: var(--md-sys-color-surface-container-high);
+        }
+        
+        .accordion-header .material-icons {
+            color: var(--md-sys-color-primary);
+            font-size: 24px;
+        }
+        
+        .accordion-title {
+            flex: 1;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+        }
+        
+        .accordion-chevron {
+            color: var(--md-sys-color-on-surface-variant);
+            transition: transform 0.2s;
+        }
+        
+        .accordion-item.active .accordion-chevron {
+            transform: rotate(180deg);
+        }
+        
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .accordion-item.active .accordion-content {
+            max-height: 1000px;
+        }
+        
+        .accordion-body {
+            padding: 0 16px 16px 16px;
+            color: var(--md-sys-color-on-surface-variant);
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        
+        .accordion-body span[style*="color: #d32f2f"] {
+            color: var(--md-sys-color-error) !important;
+        }
+        
+        /* Error Message */
+        .error-message {
+            background-color: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
+            padding: 16px;
+            border-radius: 12px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .error-message .material-icons {
+            font-size: 24px;
+        }
+        
+        /* Footer */
+        .footer {
+            background-color: var(--md-sys-color-surface-container);
+            padding: 16px;
+            margin-top: 48px;
+            border-top: 1px solid var(--md-sys-color-surface-variant);
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .footer-button {
+            height: 32px;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+        
+        .modal-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 16px;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: -16px;
+            right: -16px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--md-sys-color-surface-container-highest);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .modal-close .material-icons {
+            color: var(--md-sys-color-on-surface);
+        }
+        
+        @media (max-width: 768px) {
+            .product-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .product-image-container img {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+            }
+            
+            .modal-close {
+                top: 8px;
+                right: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-app-bar">
+        <div class="leading">
+            <i class="material-icons">eco</i>
+            <h1>NutriTürk</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="search-container">
+            <button class="md3-button md3-button-filled" id="scan-button">
+                <i class="material-icons">camera_alt</i>
+                Kamerayla Tara
+            </button>
+            
+            <div class="manual-search">
+                <div class="md3-text-field">
+                    <input type="text" id="barcode-input" placeholder=" ">
+                    <label>Ürün adı veya barkod girin</label>
+                </div>
+                <button class="md3-fab" id="manual-search-button">
+                    <i class="material-icons">search</i>
+                </button>
+            </div>
+        </div>
+
+        <div id="reader-wrapper">
+            <div id="reader"></div>
+        </div>
+
+        <div class="loader-container" id="loader">
+            <div class="md3-circular-progress"></div>
+        </div>
+
+        <div class="error-message" id="error-message">
+            <i class="material-icons">error_outline</i>
+            <span>Ürün bulunamadı. Lütfen barkodu kontrol edin veya farklı anahtar kelimelerle tekrar deneyin.</span>
+        </div>
+
+        <div class="product-card" id="product-card">
+            <div class="product-header">
+                <div class="product-image-container" id="image-container"></div>
+                <div class="product-info">
+                    <div class="product-brand" id="brand"></div>
+                    <div class="product-name" id="product-name"></div>
+                    <div class="product-quantity" id="quantity"></div>
+                </div>
+            </div>
+
+            <div class="price-section" id="price-section"></div>
+            <div class="scores-section" id="scores-section"></div>
+            <div class="accordion" id="accordion"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-content">
+            <a href="https://coff.ee/brtplus" target="_blank">
+                <img src="https://img.shields.io/badge/Destek%20Ol!-yellow?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Destek Ol!" class="footer-button">
+            </a>
+            <a href="https://forms.gle/xe7wif3a22Bnxy9DA" target="_blank">
+                <img src="https://img.shields.io/badge/Ürün%20Ekle-blue?style=for-the-badge" alt="Ürün Ekle" class="footer-button">
+            </a>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-content">
+            <img id="modal-image" src="" alt="Ürün Görseli">
+            <button class="modal-close" id="modal-close">
+                <i class="material-icons">close</i>
+            </button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- ELEMENT SELECTION ---
+            const scanButton = document.getElementById('scan-button');
+            const manualSearchButton = document.getElementById('manual-search-button');
+            const barcodeInput = document.getElementById('barcode-input');
+            const readerWrapper = document.getElementById('reader-wrapper');
+            const productCard = document.getElementById('product-card');
+            const loader = document.getElementById('loader');
+            const errorMessage = document.getElementById('error-message');
+            const accordionContainer = document.getElementById('accordion');
+            const scoresSection = document.getElementById('scores-section');
+            const imageContainer = document.getElementById('image-container');
+            const priceSection = document.getElementById('price-section');
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalImage = document.getElementById('modal-image');
+            const modalClose = document.getElementById('modal-close');
+
+            // --- CONSTANTS ---
+            const MARKET_API_URL = "https://api.marketfiyati.org.tr/api/v2";
+            const MARKET_LOGOS = { "bim": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/bim-home.svg", "a101": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/a101-home.svg", "sok": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/sok-home.svg", "migros": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/migros-home.svg", "carrefoursa": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/carrefour-home.svg", "tarim kredi": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/tarim-kredi-home.svg" };
+            
+            // --- STATE & HELPERS ---
+            const html5QrCode = new Html5Qrcode("reader");
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            function playSound(type = 'success') {
+                if (!audioContext) return;
+                const o = audioContext.createOscillator();
+                o.type = (type === 'success') ? 'sine' : 'square';
+                o.frequency.setValueAtTime((type === 'success') ? 900 : 220, audioContext.currentTime);
+                o.connect(audioContext.destination);
+                o.start();
+                o.stop(audioContext.currentTime + 0.15);
+            }
+
+            function speak(text) {
+                if ('speechSynthesis' in window && text) {
+                    window.speechSynthesis.cancel();
+                    const u = new SpeechSynthesisUtterance(text);
+                    u.lang = 'tr-TR';
+                    window.speechSynthesis.speak(u);
+                }
+            }
+            
+            function getMarketKey(marketName) {
+                const name = marketName.toLowerCase();
+                if (name.includes('carrefour')) return 'carrefoursa';
+                if (name.includes('tarım') || name.includes('kredi')) return 'tarim kredi';
+                if (name.includes('a101')) return 'a101';
+                if (name.includes('bim')) return 'bim';
+                if (name.includes('şok')) return 'sok';
+                if (name.includes('migros')) return 'migros';
+                return null;
+            }
+
+            // --- UI FUNCTIONS ---
+            function resetUI() {
+                productCard.style.display = 'none';
+                errorMessage.style.display = 'none';
+                loader.style.display = 'block';
+                readerWrapper.style.display = 'none';
+                priceSection.innerHTML = '';
+                scoresSection.innerHTML = '';
+                accordionContainer.innerHTML = '';
+                if (html5QrCode?.isScanning) {
+                    html5QrCode.stop().catch(err => {});
+                }
+            }
+
+            function handleNotFound() {
+                loader.style.display = 'none';
+                errorMessage.style.display = 'flex';
+                playSound('error');
+                speak("Ürün bulunamadı");
+            }
+            
+            const onScanSuccess = (decodedText) => {
+                html5QrCode.stop().then(() => {
+                    readerWrapper.style.display = 'none';
+                    playSound('success');
+                    barcodeInput.value = decodedText; // Arama kutusuna barkodu yaz
+                    searchForProduct(decodedText);
+                }).catch(err => console.error("Kamera durdurulamadı", err));
+            };
+
+            // --- CORE LOGIC ---
+            const searchForProduct = (query) => {
+                const trimmedQuery = query.trim();
+                if (!trimmedQuery) return;
+                resetUI();
+                const isBarcode = /^\d{8,13}$/.test(trimmedQuery);
+                fetchProductFromMarketAPI(trimmedQuery, isBarcode ? 'barcode' : 'name');
+            };
+            
+            async function fetchProductFromMarketAPI(query, type) {
+                const url = type === 'barcode' ? `${MARKET_API_URL}/searchByIdentity` : `${MARKET_API_URL}/search`;
+                const body = type === 'barcode' ? { identity: query, identityType: "barcode" } : { keywords: query };
+                
+                try {
+                    const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                    const json = await res.json();
+                    
+                    if(json.content && json.content.length > 0) {
+                        const marketProduct = json.content[0];
+                        await fetchProductFromOFF(marketProduct.barcode || query, marketProduct);
+                    } else {
+                        if (type === 'barcode') await fetchProductFromOFF(query, null);
+                        else handleNotFound();
+                    }
+                } catch(e) {
+                    console.error("Market API Hatası:", e);
+                    if (type === 'barcode') await fetchProductFromOFF(query, null);
+                    else handleNotFound();
+                }
+            }
+
+            async function fetchProductFromOFF(barcode, marketProduct) {
+                const fields = "product_name_tr,product_name,brands,quantity,image_url,nutriscore_grade,ecoscore_grade,nova_group,ingredients_text_with_allergens_tr,allergens_hierarchy,categories_hierarchy";
+                const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json?fields=${fields}`;
+                try {
+                    const r = await fetch(url);
+                    const d = await r.json();
+                    
+                    let offProduct = null;
+                    if (d.status === 1 && d.product && (d.product.product_name || d.product.product_name_tr)) {
+                        offProduct = d.product;
+                    }
+                    await displayCombinedProduct(marketProduct, offProduct);
+                } catch (error) {
+                    console.error("OpenFoodFacts API Hatası:", error);
+                    await displayCombinedProduct(marketProduct, null); 
+                }
+            }
+
+            function validateAndLoadImage(url) {
+                return new Promise((resolve) => {
+                    if (!url) return resolve(null);
+                    const img = new Image();
+                    img.onload = () => (img.naturalWidth > 50 && img.naturalHeight > 50) ? resolve(url) : resolve(null);
+                    img.onerror = () => resolve(null);
+                    img.src = url;
+                });
+            }
+
+            // --- DISPLAY FUNCTIONS ---
+            async function displayCombinedProduct(marketProduct, offProduct) {
+                if (!marketProduct && !offProduct) {
+                    handleNotFound();
+                    return;
+                }
+
+                const productName = offProduct?.product_name_tr || offProduct?.product_name || marketProduct?.title;
+                const brandName = offProduct?.brands || '';
+                const quantity = offProduct?.quantity || '';
+                const finalImageUrl = await validateAndLoadImage(offProduct?.image_url) || await validateAndLoadImage(marketProduct?.imageUrl);
+
+                displayProductHeader(productName, brandName, quantity, finalImageUrl);
+                
+                if (marketProduct?.productDepotInfoList?.length > 0) {
+                    displayPrices(marketProduct.productDepotInfoList);
+                }
+                
+                if (offProduct) {
+                    displayOffDetails(offProduct);
+                }
+
+                productCard.style.display = 'block';
+                loader.style.display = 'none';
+                playSound('success');
+                setTimeout(() => speak(productName), 400);
+            }
+
+            function displayProductHeader(name, brand, quantity, imageUrl) {
+                imageContainer.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = imageUrl || 'https://i.hizliresim.com/rt1d426.png'; // Placeholder
+                img.alt = name || "Ürün Görseli";
+                img.addEventListener('click', () => openImageModal(img.src));
+                imageContainer.appendChild(img);
+                
+                document.getElementById('brand').textContent = brand || '';
+                document.getElementById('product-name').textContent = name || 'Ürün Adı Bilinmiyor';
+                document.getElementById('quantity').textContent = quantity || '';
+            }
+
+            function displayPrices(prices) {
+                priceSection.innerHTML = `<h2>Market Fiyatları</h2><div class="price-list" id="price-list"></div>`;
+                const priceList = document.getElementById('price-list');
+                
+                if (!prices || prices.length === 0) {
+                    priceSection.innerHTML = '<p>Bu ürün için fiyat bilgisi bulunamadı.</p>';
+                    return;
+                }
+
+                prices.sort((a, b) => a.price - b.price);
+                const cheapestPrice = prices[0].price;
+
+                prices.forEach(item => {
+                    const isCheapest = item.price === cheapestPrice;
+                    const marketKey = getMarketKey(item.marketAdi);
+                    const logoUrl = marketKey ? MARKET_LOGOS[marketKey] : '';
+
+                    const priceItem = document.createElement('div');
+                    priceItem.className = 'price-item';
+                    if (isCheapest) priceItem.classList.add('cheapest');
+                    
+                    priceItem.innerHTML = `
+                        ${logoUrl ? `<img src="${logoUrl}" alt="${item.marketAdi}" class="market-logo">` : `<span>${item.marketAdi}</span>`}
+                        <div class="price-value">
+                            ${isCheapest ? '<span class="cheapest-badge">En Ucuz</span>' : ''}
+                            <span>${parseFloat(item.price).toFixed(2)} TL</span>
+                        </div>
+                    `;
+                    priceList.appendChild(priceItem);
+                });
+            }
+
+            function displayOffDetails(product) {
+                scoresSection.innerHTML = '';
+                if(product.nutriscore_grade) addScore('Nutri-Score', product.nutriscore_grade, 'nutriscore');
+                if(product.ecoscore_grade) addScore('Eco-Score', product.ecoscore_grade, 'ecoscore');
+                if(product.nova_group) addScore('NOVA Grubu', product.nova_group, 'nova-group');
+
+                accordionContainer.innerHTML = '';
+                const ingredients = product.ingredients_text_with_allergens_tr;
+                if(ingredients) addAccordionItem('İçindekiler', ingredients.replace(/_/g, ''), 'local_dining');
+
+                const allergens = product.allergens_hierarchy?.map(cat => cat.replace(/en:|fr:/g, '').replace(/-/g, ' ')).join(', ');
+                if(allergens) addAccordionItem('Alerjenler', `<span style="color: #d32f2f; font-weight: 500;">${allergens}</span>`, 'warning');
+                
+                const categories = product.categories_hierarchy?.map(cat => cat.replace(/en:|fr:/g, '').replace(/-/g, ' ')).join(' &rarr; ');
+                if(categories) addAccordionItem('Kategoriler', categories, 'category');
+                
+                // Add click listeners to new accordion headers
+                document.querySelectorAll('.accordion-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        header.parentElement.classList.toggle('active');
+                    });
+                });
+            }
+            
+            function addScore(title, score, type){
+                let visualHtml = `<div class="score-visual"><span class="no-data">Veri Yok</span></div>`;
+                if (score) {
+                    const score_img_url = {
+                        'nutriscore': `https://static.openfoodfacts.org/images/attributes/nutriscore-${String(score).toLowerCase()}.svg`,
+                        'ecoscore': `https://static.openfoodfacts.org/images/attributes/ecoscore-${String(score).toLowerCase()}.svg`,
+                        'nova-group': `https://static.openfoodfacts.org/images/misc/nova-dark-mode/nova-group-${score}-dark.svg`
+                    }[type];
+                    if (score_img_url) {
+                        visualHtml = `<div class="score-visual"><img src="${score_img_url}" alt="${title} ${score}"></div>`;
+                    }
+                }
+                scoresSection.innerHTML += `<div class="score-card"><div class="score-title">${title}</div>${visualHtml}</div>`;
+            }
+
+            function addAccordionItem(title, content, icon) {
+                accordionContainer.innerHTML += `
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <i class="material-icons">${icon}</i>
+                            <span class="accordion-title">${title}</span>
+                            <i class="material-icons accordion-chevron">expand_more</i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">${content}</div>
+                        </div>
+                    </div>`;
+            }
+
+            // --- MODAL LOGIC ---
+            function openImageModal(src) {
+                modalImage.src = src;
+                modalOverlay.classList.add('active');
+            }
+
+            function closeImageModal() {
+                modalOverlay.classList.remove('active');
+            }
+
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) closeImageModal();
+            });
+            modalClose.addEventListener('click', closeImageModal);
+            
+            // --- EVENT LISTENERS ---
+            scanButton.addEventListener('click', () => {
+                resetUI();
+                readerWrapper.style.display = 'block';
+                html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess, undefined)
+                    .catch(err => { 
+                        alert('Kamera başlatılamadı. Lütfen sayfa izinlerini kontrol edin.');
+                        readerWrapper.style.display = 'none';
+                    });
+            });
+
+            manualSearchButton.addEventListener('click', () => searchForProduct(barcodeInput.value));
+            barcodeInput.addEventListener('keypress', (e) => { 
+                if (e.key === 'Enter') searchForProduct(barcodeInput.value); 
+            });
+        });
+    </script>
+</body>
+</html>
