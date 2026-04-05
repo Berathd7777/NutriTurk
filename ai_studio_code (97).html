@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#F6FBF8">
+    <title>NutriTürk - Gıda & Fiyat Tarayıcı</title>
+    
+    <!-- Google Fonts & Material Symbols (M3 Standardı) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    
+    <style>
+        /* --- MATERIAL DESIGN 3 DESIGN TOKENS --- */
+        :root {
+            /* Light Theme */
+            --md-sys-color-primary: #006C51;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #7DF8D0;
+            --md-sys-color-on-primary-container: #002117;
+            --md-sys-color-secondary: #4A635C;
+            --md-sys-color-secondary-container: #CCE8DF;
+            --md-sys-color-on-secondary-container: #05201A;
+            --md-sys-color-surface: #F6FBF8;
+            --md-sys-color-on-surface: #171D1B;
+            --md-sys-color-surface-variant: #DBE5E0;
+            --md-sys-color-on-surface-variant: #3F4945;
+            --md-sys-color-outline: #6F7975;
+            --md-sys-color-error: #BA1A1A;
+            --md-sys-color-error-container: #FFDAD6;
+            --md-sys-color-on-error-container: #410002;
+            
+            /* Surfaces */
+            --md-sys-color-surface-container-low: #F0F5F2;
+            --md-sys-color-surface-container: #EAEFEC;
+            --md-sys-color-surface-container-high: #E5EAE7;
+            --md-sys-color-surface-container-highest: #DFE4E1;
+            
+            --md-sys-color-cheapest: #146B3A;
+            --border-radius-large: 24px;
+            --border-radius-medium: 16px;
+            --transition-standard: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        /* Dark Theme Variables */
+        [data-theme="dark"] {
+            --md-sys-color-primary: #5FDBB4;
+            --md-sys-color-on-primary: #003829;
+            --md-sys-color-primary-container: #00513D;
+            --md-sys-color-on-primary-container: #7DF8D0;
+            --md-sys-color-secondary: #B0CCC3;
+            --md-sys-color-secondary-container: #334B44;
+            --md-sys-color-on-secondary-container: #CCE8DF;
+            --md-sys-color-surface: #0E1513;
+            --md-sys-color-on-surface: #DFE4E1;
+            --md-sys-color-surface-variant: #3F4945;
+            --md-sys-color-on-surface-variant: #BFC9C4;
+            --md-sys-color-outline: #89938F;
+            --md-sys-color-error: #FFB4AB;
+            --md-sys-color-error-container: #93000A;
+            --md-sys-color-on-error-container: #FFDAD6;
+            
+            /* Dark Surfaces */
+            --md-sys-color-surface-container-low: #171D1B;
+            --md-sys-color-surface-container: #1B211F;
+            --md-sys-color-surface-container-high: #252B29;
+            --md-sys-color-surface-container-highest: #303634;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            line-height: 1.5;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .material-symbols-rounded { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+        /* --- TOP APP BAR --- */
+        .top-app-bar {
+            background-color: var(--md-sys-color-surface); height: 64px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px; position: sticky; top: 0; z-index: 1000;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        .top-app-bar.scrolled {
+            background-color: var(--md-sys-color-surface-container);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand .material-symbols-rounded { color: var(--md-sys-color-primary); font-size: 32px; }
+        .brand h1 { font-size: 22px; font-weight: 500; }
+
+        .app-actions { display: flex; gap: 4px; }
+        .icon-btn {
+            background: none; border: none; width: 48px; height: 48px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: var(--md-sys-color-on-surface-variant); cursor: pointer; transition: var(--transition-standard);
+        }
+        .icon-btn:hover { background-color: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface); }
+
+        /* --- MAIN LAYOUT --- */
+        .main-container { max-width: 800px; margin: 0 auto; padding: 24px 16px; min-height: calc(100vh - 140px); }
+
+        /* --- SEARCH SECTION --- */
+        .search-card {
+            background-color: var(--md-sys-color-surface-container-low);
+            border-radius: var(--border-radius-large); padding: 24px;
+            margin-bottom: 24px; display: flex; flex-direction: column; gap: 16px;
+        }
+        .search-bar-wrapper { display: flex; gap: 12px; align-items: center; }
+        .search-input-container {
+            flex: 1; position: relative; display: flex; align-items: center;
+            background-color: var(--md-sys-color-surface-container-highest);
+            border-radius: 28px; height: 56px; padding: 0 16px; transition: var(--transition-standard);
+        }
+        .search-input-container:focus-within { background-color: var(--md-sys-color-surface-container-low); box-shadow: inset 0 0 0 2px var(--md-sys-color-primary); }
+        .search-input-container .material-symbols-rounded { color: var(--md-sys-color-on-surface-variant); margin-right: 12px; }
+        .search-input-container input {
+            border: none; background: transparent; flex: 1; height: 100%;
+            font-size: 16px; color: var(--md-sys-color-on-surface); outline: none; font-family: inherit;
+        }
+        .fab-scan {
+            width: 56px; height: 56px; border-radius: 16px;
+            background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);
+            display: flex; align-items: center; justify-content: center;
+            border: none; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: var(--transition-standard);
+        }
+        .fab-scan:hover { box-shadow: 0 6px 12px rgba(0,0,0,0.15); transform: translateY(-2px); }
+
+        /* History Chips */
+        .history-section { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+        .history-section::-webkit-scrollbar { display: none; }
+        .chip {
+            background-color: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface-variant);
+            border: 1px solid var(--md-sys-color-outline); padding: 6px 16px; border-radius: 8px; font-size: 14px;
+            white-space: nowrap; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition-standard);
+        }
+        .chip:hover { background-color: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); border-color: transparent; }
+
+        /* --- SKELETON LOADER --- */
+        .skeleton-wrapper { display: none; flex-direction: column; gap: 16px; animation: pulse 1.5s infinite ease-in-out; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 0.3; } 100% { opacity: 0.6; } }
+        .skeleton-box { background-color: var(--md-sys-color-surface-container-high); border-radius: var(--border-radius-medium); }
+        .sk-header { height: 120px; display: flex; gap: 16px; }
+        .sk-img { width: 120px; height: 120px; border-radius: var(--border-radius-medium); }
+        .sk-text { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+        .sk-line { height: 20px; border-radius: 4px; background-color: var(--md-sys-color-surface-container-highest); }
+        .sk-line.short { width: 40%; }
+        .sk-card { height: 80px; margin-top: 16px; }
+
+        /* --- PRODUCT RESULT CARD --- */
+        .result-card { display: none; opacity: 0; transform: translateY(20px); transition: var(--transition-standard); }
+        .result-card.show { opacity: 1; transform: translateY(0); display: block; }
+        
+        .product-header {
+            background-color: var(--md-sys-color-surface-container); border-radius: var(--border-radius-large);
+            padding: 24px; display: flex; gap: 24px; margin-bottom: 16px; align-items: center;
+        }
+        .product-img-box { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+        .product-img-box img {
+            width: 100%; height: 100%; object-fit: contain; border-radius: var(--border-radius-medium);
+            background-color: var(--md-sys-color-surface-container-highest); cursor: zoom-in;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: var(--transition-standard);
+        }
+        .product-img-box img:hover { transform: scale(1.05); }
+        .product-info { flex: 1; }
+        .product-brand { font-size: 14px; font-weight: 700; color: var(--md-sys-color-primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .product-title { font-size: 24px; font-weight: 500; color: var(--md-sys-color-on-surface); line-height: 1.2; margin-bottom: 8px; }
+        .product-quantity { font-size: 14px; color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface-variant); padding: 4px 8px; border-radius: 8px; display: inline-block; }
+
+        /* --- SCORES SECTION --- */
+        .scores-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-bottom: 24px; }
+        .score-item {
+            background-color: var(--md-sys-color-surface-container-low); border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--border-radius-medium); padding: 16px 8px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+        }
+        .score-item span { font-size: 12px; font-weight: 500; color: var(--md-sys-color-on-surface-variant); text-align: center; }
+        .score-item img { height: 40px; width: auto; }
+
+        /* --- PRICE LIST & USER PRICE --- */
+        .section-title { font-size: 18px; font-weight: 500; color: var(--md-sys-color-on-surface); margin: 24px 0 16px 0; display: flex; align-items: center; gap: 8px; }
+        
+        .user-price-card {
+            background-color: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container);
+            border-radius: var(--border-radius-medium); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .up-left { display: flex; flex-direction: column; gap: 4px; }
+        .up-date { font-size: 12px; opacity: 0.8; }
+        .up-val { font-size: 20px; font-weight: 700; }
+
+        .price-list { display: flex; flex-direction: column; gap: 8px; }
+        .price-item {
+            background-color: var(--md-sys-color-surface-container); border-radius: var(--border-radius-medium);
+            padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; transition: var(--transition-standard);
+        }
+        .price-item:hover { background-color: var(--md-sys-color-surface-container-high); transform: translateX(4px); }
+        .price-item.cheapest { background-color: var(--md-sys-color-primary-container); border: 1px solid var(--md-sys-color-primary); }
+        .market-logo { height: 28px; max-width: 100px; object-fit: contain; }
+        .price-value-box { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+        .price-val { font-size: 20px; font-weight: 700; color: var(--md-sys-color-on-surface); }
+        .price-item.cheapest .price-val { color: var(--md-sys-color-on-primary-container); }
+        .badge-cheap { background-color: var(--md-sys-color-primary); color: white; font-size: 10px; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; font-weight: bold; }
+
+        /* --- ACCORDION --- */
+        .accordion { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+        .acc-item { background-color: var(--md-sys-color-surface-container-low); border-radius: var(--border-radius-medium); overflow: hidden; }
+        .acc-header {
+            padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; font-weight: 500; color: var(--md-sys-color-on-surface); transition: var(--transition-standard);
+        }
+        .acc-header:hover { background-color: var(--md-sys-color-surface-container-high); }
+        .acc-header .title-box { display: flex; align-items: center; gap: 12px; }
+        .acc-header .material-symbols-rounded { color: var(--md-sys-color-primary); }
+        .acc-icon-arrow { transition: transform 0.3s; }
+        .acc-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease-in-out; }
+        .acc-content-inner { overflow: hidden; }
+        .acc-body { padding: 0 20px 20px 20px; color: var(--md-sys-color-on-surface-variant); font-size: 14px; line-height: 1.6; }
+        .acc-item.active .acc-content { grid-template-rows: 1fr; }
+        .acc-item.active .acc-icon-arrow { transform: rotate(180deg); }
+        .allergen-text { color: var(--md-sys-color-error); font-weight: 700; background: var(--md-sys-color-error-container); padding: 2px 6px; border-radius: 4px; }
+
+        /* --- MODALS & DIALOGS --- */
+        .camera-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--md-sys-color-surface); z-index: 2000; display: flex; flex-direction: column;
+            transform: translateY(100%); visibility: hidden; opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.2, 0, 0, 1), opacity 0.4s, visibility 0.4s;
+        }
+        .camera-modal.active { transform: translateY(0); visibility: visible; opacity: 1; }
+        .camera-header { display: flex; justify-content: space-between; align-items: center; padding: 16px; background-color: var(--md-sys-color-surface-container); }
+        .camera-header h2 { font-size: 18px; font-weight: 500; }
+        #reader { flex: 1; width: 100%; background: #000; overflow: hidden; position: relative; }
+        #reader video { object-fit: cover !important; }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);
+            z-index: 2500; display: flex; justify-content: center; align-items: center;
+            opacity: 0; visibility: hidden; transition: 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .settings-dialog {
+            background-color: var(--md-sys-color-surface-container-high); width: 90%; max-width: 400px;
+            border-radius: var(--border-radius-large); padding: 24px; box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transform: scale(0.9); transition: 0.3s cubic-bezier(0.2, 0, 0, 1);
+        }
+        .modal-overlay.active .settings-dialog { transform: scale(1); }
+        .dialog-title { font-size: 22px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 24px; }
+        
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--md-sys-color-outline); }
+        .setting-item:last-child { border-bottom: none; }
+        .setting-text { display: flex; flex-direction: column; gap: 4px; padding-right: 16px; }
+        .setting-title { font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface); }
+        .setting-desc { font-size: 12px; color: var(--md-sys-color-on-surface-variant); }
+        
+        .dialog-actions { display: flex; justify-content: flex-end; margin-top: 24px; }
+        .btn-text {
+            background: transparent; border: none; color: var(--md-sys-color-primary); font-size: 14px;
+            font-weight: 500; padding: 10px 16px; border-radius: 20px; cursor: pointer; transition: 0.2s;
+        }
+        .btn-text:hover { background-color: var(--md-sys-color-surface-variant); }
+
+        .md-switch { position: relative; display: inline-block; width: 52px; height: 32px; flex-shrink: 0; }
+        .md-switch input { opacity: 0; width: 0; height: 0; }
+        .switch-slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--md-sys-color-surface-variant); border: 2px solid var(--md-sys-color-outline);
+            border-radius: 32px; transition: .3s;
+        }
+        .switch-slider:before {
+            position: absolute; content: ""; height: 16px; width: 16px; left: 6px; bottom: 6px;
+            background-color: var(--md-sys-color-outline); border-radius: 50%; transition: .3s;
+        }
+        .md-switch input:checked + .switch-slider { background-color: var(--md-sys-color-primary); border-color: var(--md-sys-color-primary); }
+        .md-switch input:checked + .switch-slider:before {
+            transform: translateX(20px); background-color: var(--md-sys-color-on-primary);
+            height: 24px; width: 24px; left: 2px; bottom: 2px;
+        }
+
+        /* --- SNACKBAR (GÜNCELLENDİ) --- */
+        .snackbar {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background-color: var(--md-sys-color-on-surface); color: var(--md-sys-color-surface);
+            padding: 14px 24px; border-radius: 8px; font-size: 14px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 3000; display: flex; align-items: center; gap: 12px;
+            opacity: 0; visibility: hidden; /* Gizlenmeyi garantiler */
+            transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+        }
+        .snackbar.show { transform: translateX(-50%) translateY(0); opacity: 1; visibility: visible; }
+        .snackbar.error { background-color: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); }
+
+        .img-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);
+            z-index: 2500; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s;
+        }
+        .img-modal.active { display: flex; opacity: 1; }
+        .img-modal img { max-width: 90%; max-height: 90%; border-radius: 16px; }
+        .img-modal-close { position: absolute; top: 24px; right: 24px; color: white; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; width: 48px; height: 48px; cursor: pointer; }
+
+        .footer { text-align: center; padding: 32px 16px; margin-top: auto; border-top: 1px solid var(--md-sys-color-surface-variant); }
+        .footer-links { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+        .footer-links img { height: 36px; border-radius: 8px; transition: transform 0.2s; }
+        .footer-links img:hover { transform: scale(1.05); }
+
+        @media (max-width: 600px) {
+            .product-header { flex-direction: column; text-align: center; }
+            .price-item { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .price-value-box { align-items: flex-start; flex-direction: row-reverse; width: 100%; justify-content: space-between;}
+        }
+    </style>
+</head>
+<body>
+
+    <header class="top-app-bar" id="topBar">
+        <div class="brand">
+            <span class="material-symbols-rounded">eco</span>
+            <h1>NutriTürk</h1>
+        </div>
+        <div class="app-actions">
+            <button class="icon-btn" id="btnTts" title="Sesli Asistan">
+                <span class="material-symbols-rounded" id="ttsIcon">volume_up</span>
+            </button>
+            <button class="icon-btn" id="btnTheme" title="Tema Değiştir">
+                <span class="material-symbols-rounded" id="themeIcon">dark_mode</span>
+            </button>
+            <button class="icon-btn" id="btnSettings" title="Ayarlar">
+                <span class="material-symbols-rounded">settings</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <section class="search-card">
+            <div class="search-bar-wrapper">
+                <div class="search-input-container">
+                    <span class="material-symbols-rounded">search</span>
+                    <input type="text" id="searchInput" placeholder="Ürün adı veya barkod girin...">
+                </div>
+                <button class="fab-scan" id="btnScan" title="Kamera ile Tara">
+                    <span class="material-symbols-rounded">barcode_scanner</span>
+                </button>
+            </div>
+            <div class="history-section" id="historyChips"></div>
+        </section>
+
+        <div class="skeleton-wrapper" id="loader">
+            <div class="skeleton-box sk-header">
+                <div class="sk-img"></div>
+                <div class="sk-text"><div class="sk-line short"></div><div class="sk-line"></div><div class="sk-line short"></div></div>
+            </div>
+            <div class="skeleton-box sk-card"></div>
+            <div class="skeleton-box sk-card"></div>
+        </div>
+
+        <div class="result-card" id="resultContainer">
+            <div class="product-header">
+                <div class="product-img-box">
+                    <img id="pImg" src="" alt="Ürün Görseli">
+                </div>
+                <div class="product-info">
+                    <div class="product-brand" id="pBrand"></div>
+                    <h2 class="product-title" id="pTitle"></h2>
+                    <div class="product-quantity" id="pQuantity"></div>
+                </div>
+            </div>
+
+            <div class="scores-grid" id="pScores"></div>
+
+            <div id="userPriceWrapper" style="display:none; margin-bottom: 24px;">
+                <h3 class="section-title">
+                    <span class="material-symbols-rounded">person</span> 
+                    Kullanıcı Fiyatı (OpenFoodFacts)
+                </h3>
+                <div class="user-price-card" id="uPriceCard"></div>
+            </div>
+
+            <div id="priceSectionWrapper" style="display:none;">
+                <h3 class="section-title">
+                    <span class="material-symbols-rounded">storefront</span> 
+                    Market Fiyatları
+                </h3>
+                <div class="price-list" id="pPrices"></div>
+            </div>
+
+            <h3 class="section-title">
+                <span class="material-symbols-rounded">info</span> 
+                Ürün Detayları
+            </h3>
+            <div class="accordion" id="pDetails"></div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="https://coff.ee/brtplus" target="_blank">
+                <img src="https://img.shields.io/badge/Destek%20Ol!-yellow?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Destek Ol!">
+            </a>
+            <a href="https://forms.gle/xe7wif3a22Bnxy9DA" target="_blank">
+                <img src="https://img.shields.io/badge/Ürün%20Ekle-006C51?style=for-the-badge" alt="Ürün Ekle">
+            </a>
+        </div>
+    </footer>
+
+    <div class="modal-overlay" id="settingsModal">
+        <div class="settings-dialog">
+            <h3 class="dialog-title">Ayarlar</h3>
+            <div class="setting-item">
+                <div class="setting-text">
+                    <span class="setting-title">Kullanıcı Fiyatı</span>
+                    <span class="setting-desc">OpenFoodFacts'te kullanıcıların girdiği fiyatları (varsa) gösterir.</span>
+                </div>
+                <label class="md-switch">
+                    <input type="checkbox" id="toggleUserPrice">
+                    <span class="switch-slider"></span>
+                </label>
+            </div>
+            <div class="dialog-actions">
+                <button class="btn-text" id="btnSettingsClose">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="camera-modal" id="cameraModal">
+        <div class="camera-header">
+            <h2>Barkod Okutun</h2>
+            <button class="icon-btn" id="btnCameraClose"><span class="material-symbols-rounded">close</span></button>
+        </div>
+        <div id="reader"></div>
+    </div>
+
+    <div class="img-modal" id="imgModal">
+        <button class="img-modal-close" id="imgModalClose"><span class="material-symbols-rounded">close</span></button>
+        <img id="modalImgSrc" src="" alt="Büyük Görsel">
+    </div>
+
+    <div class="snackbar" id="snackbar">
+        <span class="material-symbols-rounded" id="snackbarIcon">info</span>
+        <span id="snackbarText">Bildirim</span>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const MARKET_API_URL = "https://api.marketfiyati.org.tr/api/v2";
+            const OFF_PRICES_API = "https://prices.openfoodfacts.org/api/v1/prices"; // Yeni OFF Fiyat API'si
+            const DEFAULT_IMG_URL = "https://i.hizliresim.com/rt1d426.png";
+            const MARKET_LOGOS = {
+                "bim": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/bim-home.svg",
+                "a101": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/a101-home.svg",
+                "sok": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/sok-home.svg",
+                "migros": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/migros-home.svg",
+                "carrefoursa": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/carrefour-home.svg",
+                "tarim kredi": "https://raw.githubusercontent.com/Berathd7777/NutriTurk/refs/heads/main/tarim-kredi-home.svg"
+            };
+
+            let isTtsEnabled = localStorage.getItem('nutriturk_tts') !== 'false';
+            let isUserPriceEnabled = localStorage.getItem('nutriturk_user_price') !== 'false';
+            let searchHistory = JSON.parse(localStorage.getItem('nutriturk_history') || '[]');
+            let html5QrCode = null;
+            let snackbarTimer = null; // Snackbar zamanlayıcısı
+
+            const els = {
+                searchInput: document.getElementById('searchInput'),
+                btnScan: document.getElementById('btnScan'),
+                loader: document.getElementById('loader'),
+                resultContainer: document.getElementById('resultContainer'),
+                cameraModal: document.getElementById('cameraModal'),
+                btnCameraClose: document.getElementById('btnCameraClose'),
+                btnTheme: document.getElementById('btnTheme'),
+                themeIcon: document.getElementById('themeIcon'),
+                btnTts: document.getElementById('btnTts'),
+                ttsIcon: document.getElementById('ttsIcon'),
+                btnSettings: document.getElementById('btnSettings'),
+                settingsModal: document.getElementById('settingsModal'),
+                btnSettingsClose: document.getElementById('btnSettingsClose'),
+                toggleUserPrice: document.getElementById('toggleUserPrice'),
+                historyChips: document.getElementById('historyChips'),
+                imgModal: document.getElementById('imgModal'),
+                pImg: document.getElementById('pImg'),
+                topBar: document.getElementById('topBar')
+            };
+
+            initTheme();
+            els.ttsIcon.textContent = isTtsEnabled ? 'volume_up' : 'volume_off';
+            els.toggleUserPrice.checked = isUserPriceEnabled;
+            renderHistory();
+
+            function initTheme() {
+                const savedTheme = localStorage.getItem('nutriturk_theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    els.themeIcon.textContent = 'light_mode';
+                }
+            }
+            
+            els.btnTheme.addEventListener('click', () => {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                if (isDark) {
+                    document.documentElement.removeAttribute('data-theme');
+                    els.themeIcon.textContent = 'dark_mode';
+                    localStorage.setItem('nutriturk_theme', 'light');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    els.themeIcon.textContent = 'light_mode';
+                    localStorage.setItem('nutriturk_theme', 'dark');
+                }
+            });
+
+            els.btnSettings.addEventListener('click', () => els.settingsModal.classList.add('active'));
+            els.btnSettingsClose.addEventListener('click', () => els.settingsModal.classList.remove('active'));
+            els.settingsModal.addEventListener('click', (e) => { if(e.target === els.settingsModal) els.settingsModal.classList.remove('active'); });
+            els.toggleUserPrice.addEventListener('change', (e) => {
+                isUserPriceEnabled = e.target.checked;
+                localStorage.setItem('nutriturk_user_price', isUserPriceEnabled);
+            });
+
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            function playBeep(success = true) {
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                osc.type = success ? 'sine' : 'square';
+                osc.frequency.setValueAtTime(success ? 900 : 300, audioCtx.currentTime);
+                osc.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            }
+
+            els.btnTts.addEventListener('click', () => {
+                isTtsEnabled = !isTtsEnabled;
+                localStorage.setItem('nutriturk_tts', isTtsEnabled);
+                els.ttsIcon.textContent = isTtsEnabled ? 'volume_up' : 'volume_off';
+                if(!isTtsEnabled) window.speechSynthesis.cancel();
+            });
+
+            function formatPriceForSpeech(val) {
+                const num = parseFloat(val);
+                if(isNaN(num)) return val;
+                const tl = Math.floor(num);
+                const kurus = Math.round((num - tl) * 100);
+                let str = '';
+                if(tl > 0) str += `${tl} Lira `;
+                if(kurus > 0) str += `${kurus} Kuruş`;
+                return str.trim() || '0 Lira';
+            }
+
+            function speak(text) {
+                if (!isTtsEnabled || !('speechSynthesis' in window)) return;
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'tr-TR';
+                u.rate = 1.05;
+                window.speechSynthesis.speak(u);
+            }
+
+            function showSnackbar(msg, type = 'info') {
+                const sb = document.getElementById('snackbar');
+                document.getElementById('snackbarText').textContent = msg;
+                document.getElementById('snackbarIcon').textContent = type === 'error' ? 'error' : 'info_check';
+                
+                sb.className = `snackbar show ${type === 'error' ? 'error' : ''}`;
+                
+                // Önceki zamanlayıcıyı iptal edip yenisini başlatıyoruz (Takılmayı önler)
+                clearTimeout(snackbarTimer);
+                snackbarTimer = setTimeout(() => {
+                    sb.classList.remove('show');
+                }, 3000);
+            }
+
+            function setUiState(state) {
+                els.loader.style.display = 'none';
+                els.resultContainer.classList.remove('show');
+                if (state === 'loading') els.loader.style.display = 'flex';
+                else if (state === 'result') els.resultContainer.classList.add('show');
+            }
+
+            window.addEventListener('scroll', () => {
+                if(window.scrollY > 10) els.topBar.classList.add('scrolled');
+                else els.topBar.classList.remove('scrolled');
+            });
+
+            function updateHistory(query) {
+                if(!query) return;
+                searchHistory = searchHistory.filter(item => item !== query);
+                searchHistory.unshift(query);
+                if(searchHistory.length > 5) searchHistory.pop();
+                localStorage.setItem('nutriturk_history', JSON.stringify(searchHistory));
+                renderHistory();
+            }
+
+            function renderHistory() {
+                els.historyChips.innerHTML = '';
+                searchHistory.forEach(q => {
+                    const chip = document.createElement('div');
+                    chip.className = 'chip';
+                    chip.innerHTML = `<span class="material-symbols-rounded">history</span> ${q}`;
+                    chip.addEventListener('click', () => {
+                        els.searchInput.value = q;
+                        startSearch(q);
+                    });
+                    els.historyChips.appendChild(chip);
+                });
+            }
+
+            els.searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') startSearch(els.searchInput.value);
+            });
+
+            async function startSearch(query) {
+                const val = query.trim();
+                if (!val) return;
+                
+                els.searchInput.blur();
+                setUiState('loading');
+                updateHistory(val);
+                
+                const isBarcode = /^\d{8,13}$/.test(val);
+                try {
+                    await fetchProductData(val, isBarcode);
+                } catch (err) {
+                    showSnackbar('Ürün aranırken bir hata oluştu.', 'error');
+                    setUiState('none');
+                }
+            }
+
+            async function fetchProductData(query, isBarcode) {
+                const url = isBarcode ? `${MARKET_API_URL}/searchByIdentity` : `${MARKET_API_URL}/search`;
+                const body = isBarcode ? { identity: query, identityType: "barcode" } : { keywords: query };
+                
+                let marketData = null;
+                try {
+                    const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                    const json = await res.json();
+                    if(json.content && json.content.length > 0) marketData = json.content[0];
+                } catch(e) { console.warn("Market API Error", e); }
+
+                const searchOffBarcode = isBarcode ? query : (marketData?.barcode || null);
+                let offData = null;
+                let offUserPriceData = null;
+                
+                if (searchOffBarcode) {
+                    // 1. Standart OFF Ürün Verisi
+                    try {
+                        const fields = "product_name_tr,product_name,brands,quantity,image_url,nutriscore_grade,ecoscore_grade,nova_group,ingredients_text_with_allergens_tr,allergens_hierarchy,categories_hierarchy";
+                        const r = await fetch(`https://world.openfoodfacts.org/api/v2/product/${searchOffBarcode}.json?fields=${fields}`);
+                        const d = await r.json();
+                        if (d.status === 1) offData = d.product;
+                    } catch(e) { console.warn("OFF API Error", e); }
+
+                    // 2. OpenPrices Fiyat Verisi (Kullanıcı istediyse)
+                    if (isUserPriceEnabled) {
+                        try {
+                            const pRes = await fetch(`${OFF_PRICES_API}?product_code=${searchOffBarcode}&size=1&order_by=-date`);
+                            if (pRes.ok) {
+                                const pJson = await pRes.json();
+                                if (pJson.items && pJson.items.length > 0) {
+                                    offUserPriceData = pJson.items[0]; // En güncel fiyatı alır
+                                }
+                            }
+                        } catch(e) { console.warn("OFF Prices API Error", e); }
+                    }
+                }
+
+                if (!marketData && !offData) {
+                    playBeep(false);
+                    showSnackbar('Ürün bulunamadı. Lütfen farklı bir arama yapın.', 'error');
+                    speak("Ürün bulunamadı");
+                    setUiState('none');
+                    return;
+                }
+
+                renderProduct(marketData, offData, offUserPriceData);
+            }
+
+            async function renderProduct(m, o, offPrice) {
+                const name = o?.product_name_tr || o?.product_name || m?.title || 'Bilinmeyen Ürün';
+                const brand = o?.brands || '';
+                document.getElementById('pTitle').textContent = name;
+                document.getElementById('pBrand').textContent = brand;
+                document.getElementById('pQuantity').textContent = o?.quantity || '';
+                document.getElementById('pQuantity').style.display = o?.quantity ? 'inline-block' : 'none';
+
+                let imgUrl = o?.image_url || m?.imageUrl;
+                els.pImg.src = await checkImage(imgUrl) ? imgUrl : DEFAULT_IMG_URL;
+                
+                // OFF Kullanıcı Fiyatı Kutusu
+                const uPriceWrapper = document.getElementById('userPriceWrapper');
+                const uPriceCard = document.getElementById('uPriceCard');
+                uPriceWrapper.style.display = 'none';
+
+                if (isUserPriceEnabled && offPrice && offPrice.price) {
+                    const pDate = offPrice.date ? new Date(offPrice.date).toLocaleDateString('tr-TR') : 'Bilinmeyen Tarih';
+                    uPriceCard.innerHTML = `
+                        <div class="up-left">
+                            <span class="up-val">₺${parseFloat(offPrice.price).toFixed(2)}</span>
+                            <span class="up-date">Eklenme: ${pDate}</span>
+                        </div>
+                        <span class="material-symbols-rounded">cloud_done</span>
+                    `;
+                    uPriceWrapper.style.display = 'block';
+                }
+
+                // Market Fiyatları
+                const priceWrapper = document.getElementById('priceSectionWrapper');
+                const priceList = document.getElementById('pPrices');
+                priceList.innerHTML = '';
+                let cheapestVal = null;
+
+                if (m?.productDepotInfoList?.length > 0) {
+                    const prices = [...m.productDepotInfoList].sort((a, b) => a.price - b.price);
+                    cheapestVal = prices[0].price;
+                    
+                    prices.forEach(p => {
+                        const isCheap = p.price === cheapestVal;
+                        const mkName = p.marketAdi.toLowerCase();
+                        let mkKey = Object.keys(MARKET_LOGOS).find(k => mkName.includes(k));
+                        
+                        priceList.innerHTML += `
+                            <div class="price-item ${isCheap ? 'cheapest' : ''}">
+                                ${mkKey ? `<img src="${MARKET_LOGOS[mkKey]}" class="market-logo" alt="${p.marketAdi}">` : `<span style="font-weight:500;">${p.marketAdi}</span>`}
+                                <div class="price-value-box">
+                                    ${isCheap ? '<span class="badge-cheap">En Ucuz</span>' : ''}
+                                    <span class="price-val">₺${parseFloat(p.price).toFixed(2)}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    priceWrapper.style.display = 'block';
+                } else {
+                    priceWrapper.style.display = 'none';
+                }
+
+                const scoresDiv = document.getElementById('pScores');
+                scoresDiv.innerHTML = '';
+                if(o) {
+                    if(o.nutriscore_grade) appendScore(scoresDiv, 'Nutri-Score', o.nutriscore_grade, `nutriscore-${o.nutriscore_grade}-new-en.svg`);
+                    if(o.ecoscore_grade) appendScore(scoresDiv, 'Eco-Score', o.ecoscore_grade, o.ecoscore_grade === 'not-applicable' ? 'green-score-not-applicable.svg' : `green-score-${o.ecoscore_grade}.svg`);
+                    if(o.nova_group) appendScore(scoresDiv, 'NOVA', o.nova_group, `nova-group-${o.nova_group}.svg`);
+                }
+
+                const detailsDiv = document.getElementById('pDetails');
+                detailsDiv.innerHTML = '';
+                
+                if(o?.ingredients_text_with_allergens_tr) 
+                    addAccordion(detailsDiv, 'İçindekiler', 'local_dining', o.ingredients_text_with_allergens_tr.replace(/_/g, ''));
+                if(o?.allergens_hierarchy?.length > 0) {
+                    const aText = o.allergens_hierarchy.map(a => a.replace(/en:|fr:/g, '').replace(/-/g, ' ')).join(', ');
+                    addAccordion(detailsDiv, 'Alerjenler', 'warning', `<span class="allergen-text">${aText}</span>`);
+                }
+                if(o?.categories_hierarchy?.length > 0) {
+                    const cText = o.categories_hierarchy.map(c => c.replace(/en:|fr:/g, '').replace(/-/g, ' ')).join(' > ');
+                    addAccordion(detailsDiv, 'Kategoriler', 'category', cText);
+                }
+
+                if(detailsDiv.innerHTML === '') {
+                    detailsDiv.innerHTML = '<p style="color:var(--md-sys-color-on-surface-variant); font-size:14px;">Bu ürün için ekstra detay bulunamadı.</p>';
+                }
+
+                playBeep(true);
+                setUiState('result');
+
+                let speechTxt = `${brand} ${name}. `;
+                if(cheapestVal) {
+                    speechTxt += `En ucuz fiyat ${formatPriceForSpeech(cheapestVal)}.`;
+                }
+                setTimeout(() => speak(speechTxt), 500);
+            }
+
+            function appendScore(container, title, val, imgName) { container.innerHTML += `<div class="score-item"><span>${title}</span><img src="https://static.openfoodfacts.org/images/attributes/dist/${imgName}" alt="${title} ${val}"></div>`; }
+
+            function addAccordion(container, title, icon, content) {
+                const item = document.createElement('div');
+                item.className = 'acc-item';
+                item.innerHTML = `<div class="acc-header"><div class="title-box"><span class="material-symbols-rounded">${icon}</span><span>${title}</span></div><span class="material-symbols-rounded acc-icon-arrow">expand_more</span></div><div class="acc-content"><div class="acc-content-inner"><div class="acc-body">${content}</div></div></div>`;
+                item.querySelector('.acc-header').addEventListener('click', () => item.classList.toggle('active'));
+                container.appendChild(item);
+            }
+
+            function checkImage(url) {
+                return new Promise(res => {
+                    if(!url) return res(false);
+                    const img = new Image();
+                    img.onload = () => res(img.width > 10 && img.height > 10);
+                    img.onerror = () => res(false);
+                    img.src = url;
+                });
+            }
+
+            els.btnScan.addEventListener('click', () => {
+                els.cameraModal.classList.add('active');
+                if(!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+                
+                html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, 
+                (text) => {
+                    stopCamera();
+                    els.searchInput.value = text;
+                    startSearch(text);
+                }, 
+                undefined).catch(err => {
+                    stopCamera();
+                    showSnackbar('Kamera başlatılamadı. İzinleri kontrol edin.', 'error');
+                });
+            });
+
+            function stopCamera() {
+                els.cameraModal.classList.remove('active');
+                if (html5QrCode && html5QrCode.isScanning) { html5QrCode.stop().catch(console.error); }
+            }
+            els.btnCameraClose.addEventListener('click', stopCamera);
+            els.pImg.addEventListener('click', () => { document.getElementById('modalImgSrc').src = els.pImg.src; els.imgModal.classList.add('active'); });
+            document.getElementById('imgModalClose').addEventListener('click', () => els.imgModal.classList.remove('active'));
+            els.imgModal.addEventListener('click', (e) => { if(e.target === els.imgModal) els.imgModal.classList.remove('active'); });
+        });
+    </script>
+</body>
+</html>
