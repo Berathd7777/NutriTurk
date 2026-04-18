@@ -553,6 +553,14 @@
 
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script>
+        // PWA Service Worker Kaydı
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker Kaydedildi!', reg))
+            .catch(err => console.log('Service Worker Hatası:', err));
+    });
+}
         // PWA - Ana Ekrana Ekleme (A2HS) Logic
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
